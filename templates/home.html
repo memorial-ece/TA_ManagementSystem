@@ -2,8 +2,8 @@
 
 {% block content %}
     {% if user.is_authenticated %}
-        Hi {{ user.username }}!
-        <a href="{% url 'logout' %}">logout</a>
+        <p>Hi {{ user.username }}!<a href="{% url 'logout' %}">logout</a></p>
+        <a href="{% url 'course_list' id=user.id %}">course list</a>
     {% else %}
         <p>please login the system</p>
         <a href="{% url 'login' %}">login</a>

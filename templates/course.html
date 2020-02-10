@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Course List</h1>
+    <table border="2" bordercolor="black" width="500" height="200" cellspacing="0" cellpadding="5">
+        <tr>
+            <th>Subject</th>
+            <th>Course name</th>
+            <th>Link</th>
+            <th>Link</th>
+        </tr>
+        {% for course in courses %}
+            <tr>
+                <td>{{ course.subject }}{{ course.courseName }}</td>
+                <td>{{ course.title }}</td>
+                <td><a href="{% url 'taDuty_list' id=course.id %}">View details/Duties</a></td>
+                <td><a href="{% url 'rank_ta' %}">rank TA</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
