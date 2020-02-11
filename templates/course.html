@@ -13,7 +13,7 @@
             <tr>
                 <td>{{ course.subject }}{{ course.courseName }}</td>
                 <td>{{ course.title }}</td>
-                <td><a href="{% url 'taDuty_list' id=course.id %}">View details/Duties</a></td>
+                <td><a href="{% url 'duty_detail' id=course.id %}">View details/Duties</a></td>
                 <td><a href="{% url 'rank_ta' %}">rank TA</a></td>
             </tr>
         {% endfor %}

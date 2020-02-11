@@ -8,14 +8,19 @@
             <th>student name</th>
             <th>e-mail</th>
             <th>CV</th>
+            <th>ranking</th>
         </tr>
         {% for ta in tas %}
         <tr>
-            <td><input type="checkbox"></td>
+            <td><label><input type="checkbox"  value="{{ ta.id }}"></label></td>
             <td>{{ ta.user.first_name }}&nbsp;{{ ta.user.last_name }}</td>
             <td>{{ ta.user.email }}</td>
             <td><a href="{{ ta.cv.url }}">view cv</a></td>
+            <td></td>
         </tr>
         {% endfor %}
     </table>
+    <script type="text/javascript">
+
+    </script>
 {% endblock %}

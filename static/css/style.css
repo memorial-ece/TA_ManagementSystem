@@ -1,0 +1,8 @@
+.duty {
+    border: none;
+}
+
+.duty:focus{
+    outline:none;
+    border: 1px solid #f60;
+}
