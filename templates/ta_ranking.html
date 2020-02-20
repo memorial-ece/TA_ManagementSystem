@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <table border="2" bordercolor="black" width="500" height="200" cellspacing="0" cellpadding="5">
+        <tr>
+            <th>ranking</th>
+            <th>student name</th>
+            <th>email</th>
+        </tr>
+        {% for rank in ranking %}
+            <tr>
+                <td>{{ rank.value }}</td>
+                <td>{{ rank.TA.user.first_name }}&nbsp;{{ rank.TA.user.last_name }}</td>
+                <td>{{ rank.TA.user.email }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

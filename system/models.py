@@ -27,7 +27,7 @@ class DepartmentHead(models.Model):
 
 
 class Course(models.Model):
-    instructor = models.ForeignKey(Teacher, on_delete=models.CASCADE) # instructor_id
+    instructor = models.ForeignKey(Teacher, on_delete=models.CASCADE)  # instructor_id
     CRN = models.CharField(max_length=5)
     semester = models.CharField(max_length=10)
     title = models.CharField(max_length=50)
@@ -40,7 +40,7 @@ class Course(models.Model):
 
 
 class TADuty(models.Model):
-    curriculum = models.ForeignKey(Course, on_delete=models.CASCADE) # curriculum_id
+    curriculum = models.ForeignKey(Course, on_delete=models.CASCADE)  # curriculum_id
     labNumber = models.IntegerField(default=0)
     preparationHour = models.FloatField(default=0)
     labHour = models.FloatField(default=0)
@@ -55,4 +55,10 @@ class TADuty(models.Model):
         return self.curriculum.subject + self.curriculum.courseName
 
 
+class RankTA(models.Model):
+    curriculum = models.ForeignKey(Course, on_delete=models.CASCADE)
+    TA = models.ForeignKey(TA, on_delete=models.CASCADE)
+    value = models.IntegerField(default=0)  # ranking for TA
 
+    def __str__(self):
+        return self.curriculum.subject + self.curriculum.courseName

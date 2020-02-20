@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
-from .models import Teacher, TA, DepartmentHead, TADuty, Course
+from .models import Teacher, TA, DepartmentHead, TADuty, Course, RankTA
 from .forms import DutyCreateForm
 from django.shortcuts import redirect
 
@@ -9,7 +9,8 @@ from django.shortcuts import redirect
 def course_list(request, id):
     teacher = Teacher.objects.get(user_id=id)
     courses = teacher.course_set.all()
-    return render(request, 'course.html', {'courses': courses})
+    rank = RankTA.objects.all()
+    return render(request, 'course.html', {'courses': courses, 'rank': rank})
 
 
 # course corresponds TA duty
@@ -52,6 +53,25 @@ def duty_edit(request, id):
 
 
 # instructors rank candidate TAs
-def rank_ta(request):
+def ta_list(request, id):
     tas = TA.objects.all()
-    return render(request, 'rank_ta.html', {'tas': tas})
+    result = RankTA.objects.get(curriculum_id=id)
+    if result.exists():
+        return redirect('rank_ta', id=id)
+    return render(request, 'ta_list.html', {'tas': tas, 'course_id': id})
+
+
+def rank_ta(request, id):
+    if request.method == "POST":
+        rank = request.POST["ranking"]
+        ranking_id = rank.split(",")
+        ranking_id.pop()  # delete last empty number
+        rank_value = 1
+        for i in ranking_id:
+            ta = TA.objects.get(id=i)
+            course = Course.objects.get(id=id)
+            RankTA.objects.create(curriculum=course, TA=ta, value=rank_value)
+            rank_value = rank_value + 1
+        ranking = RankTA.objects.filter(curriculum_id=id).order_by("value")
+        return render(request, "ta_ranking.html", {'course_id': id, 'ranking': ranking})
+    return redirect('ta_list', id=id)
