@@ -3,17 +3,19 @@ from django.shortcuts import render, get_object_or_404
 from .models import Teacher, TA, DepartmentHead, TADuty, Course, RankTA
 from .forms import DutyCreateForm
 from django.shortcuts import redirect
+from django.db.models import Q
 
 
 # course list for each instructor
+@login_required
 def course_list(request, id):
     teacher = Teacher.objects.get(user_id=id)
     courses = teacher.course_set.all()
-    rank = RankTA.objects.all()
-    return render(request, 'course.html', {'courses': courses, 'rank': rank})
+    return render(request, 'course.html', {'courses': courses})
 
 
 # course corresponds TA duty
+@login_required
 def duty_detail(request, id):
     course = Course.objects.get(id=id)
     taDuty = TADuty.objects.get(curriculum_id=id)
@@ -21,6 +23,8 @@ def duty_detail(request, id):
 
 
 # edit TA duty
+# id : course id
+@login_required
 def duty_edit(request, id):
     duty = get_object_or_404(TADuty, curriculum_id=id)
     if request.method == "POST":
@@ -53,25 +57,43 @@ def duty_edit(request, id):
 
 
 # instructors rank candidate TAs
+# id: course id
+@login_required
 def ta_list(request, id):
-    tas = TA.objects.all()
-    result = RankTA.objects.get(curriculum_id=id)
+    result = RankTA.objects.filter(curriculum_id=id)
     if result.exists():
-        return redirect('rank_ta', id=id)
-    return render(request, 'ta_list.html', {'tas': tas, 'course_id': id})
-
-
-def rank_ta(request, id):
-    if request.method == "POST":
-        rank = request.POST["ranking"]
-        ranking_id = rank.split(",")
-        ranking_id.pop()  # delete last empty number
-        rank_value = 1
-        for i in ranking_id:
-            ta = TA.objects.get(id=i)
-            course = Course.objects.get(id=id)
-            RankTA.objects.create(curriculum=course, TA=ta, value=rank_value)
-            rank_value = rank_value + 1
         ranking = RankTA.objects.filter(curriculum_id=id).order_by("value")
         return render(request, "ta_ranking.html", {'course_id': id, 'ranking': ranking})
+    else:
+        tas = TA.objects.all()
+        ta_contains_query = request.GET.get('ta_contains')
+        if ta_contains_query != '' and ta_contains_query is not None:
+            tas = tas.filter(Q(user__first_name__icontains=ta_contains_query)
+                       | Q(user__last_name__icontains=ta_contains_query)
+                       ).distinct()
+        return render(request, 'ta_list.html', {'tas': tas, 'course_id': id})
+
+
+# store ranking to db
+# id : course id
+@login_required
+def rank_ta(request, id):
+    if request.method == "POST":
+        result = RankTA.objects.filter(curriculum_id=id)
+        if result.exists():
+            return redirect('ta_list', id=id)
+        else:
+            rank = request.POST["ranking"]
+            ranking_id = rank.split(",")
+            ranking_id.pop()  # delete last empty number
+            rank_value = 1
+            for i in ranking_id:
+                ta = TA.objects.get(id=i)
+                course = Course.objects.get(id=id)
+                RankTA.objects.create(curriculum=course, TA=ta, value=rank_value)
+                rank_value = rank_value + 1
+            ranking = RankTA.objects.filter(curriculum_id=id).order_by("value")
+            return render(request, "ta_ranking.html", {'course_id': id, 'ranking': ranking})
     return redirect('ta_list', id=id)
+
+
