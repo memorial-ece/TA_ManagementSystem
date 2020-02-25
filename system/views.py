@@ -1,12 +1,15 @@
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from .models import Teacher, TA, DepartmentHead, TADuty, Course, RankTA
 from .forms import DutyCreateForm
 from django.shortcuts import redirect
 from django.db.models import Q
+import json
 
 
 # course list for each instructor
+# id: user id
 @login_required
 def course_list(request, id):
     teacher = Teacher.objects.get(user_id=id)
@@ -64,13 +67,24 @@ def ta_list(request, id):
     if result.exists():
         ranking = RankTA.objects.filter(curriculum_id=id).order_by("value")
         return render(request, "ta_ranking.html", {'course_id': id, 'ranking': ranking})
+    elif request.is_ajax():
+        q = request.GET.get('ta_contains')
+        search_qs = TA.objects.filter(Q(user__first_name__icontains=q)
+                                      | Q(user__last_name__icontains=q)
+                                      ).distinct()
+        results = []
+        for r in search_qs:
+            results.append(r.user.first_name + " " + r.user.last_name)
+        data = json.dumps(results)
+        mimetype = 'application/json'
+        return HttpResponse(data, mimetype)
     else:
         tas = TA.objects.all()
         ta_contains_query = request.GET.get('ta_contains')
         if ta_contains_query != '' and ta_contains_query is not None:
             tas = tas.filter(Q(user__first_name__icontains=ta_contains_query)
-                       | Q(user__last_name__icontains=ta_contains_query)
-                       ).distinct()
+                             | Q(user__last_name__icontains=ta_contains_query)
+                             ).distinct()
         return render(request, 'ta_list.html', {'tas': tas, 'course_id': id})
 
 
@@ -95,5 +109,3 @@ def rank_ta(request, id):
             ranking = RankTA.objects.filter(curriculum_id=id).order_by("value")
             return render(request, "ta_ranking.html", {'course_id': id, 'ranking': ranking})
     return redirect('ta_list', id=id)
-
-

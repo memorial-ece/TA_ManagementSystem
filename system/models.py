@@ -14,6 +14,7 @@ class TA(models.Model):
     # %Y: year, %M: month, %D: day
     cv = models.FileField(blank=True, null=True, upload_to="cvs/%Y/%m/%d/")
     availableHours = models.FloatField(default=0)
+    # department = models.CharField()
 
     def __str__(self):
         return self.user.first_name + self.user.last_name

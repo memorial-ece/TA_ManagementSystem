@@ -2,11 +2,9 @@
 
 {% block content %}
     <h1>select TA for course</h1>
-    <form method="get" action="{% url "ta_list" id=course_id %}">
+    <form method="get" action="{% url "ta_list" id=course_id %}">{% csrf_token %}
         <label><input type="search" id="search-text" name="ta_contains" placeholder="TA..." width="400"></label>
-        <p><span></span></p>
         <button type="submit">search</button>
-{#        <p><span id="search-result"></span></p>#}
     </form>
     <form name="ta" action="{% url "rank_ta" id=course_id %}" method="post">{% csrf_token %}
         <table border="0" width="1000">
@@ -40,4 +38,17 @@
             <button type="submit">submit</button>
         </p>
     </form>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#search-text").autocomplete({
+                source:"{% url "ta_list" id=course_id %}",
+                minLength:2,
+                open: function () {
+                    setTimeout(function () {
+                        $('.ui-autocomplete').css('z-index',99);
+                    },0)
+                }
+            });
+        });
+    </script>
 {% endblock %}
