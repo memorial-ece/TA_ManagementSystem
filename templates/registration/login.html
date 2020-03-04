@@ -2,9 +2,22 @@
 
 {% block content %}
 <h2>login</h2>
-<form method="post">
+<form method="post" action="{% url 'login' %}">
     {% csrf_token %}
-    {{ form.as_p }}
+    <p>
+        <label>username:<input type="text" name="username" required></label>
+    </p>
+    <p>
+        <label>password:<input type="password" name="password" required></label>
+    </p>
+    <p>
+       <label>
+        <input type="radio" name="system" value="instructor">instructor</label>
+    <label>
+        <input type="radio" name="system" value="TA">TA</label>
+    <label>
+        <input type="radio" name="system" value="departmenthead">department head</label>
+    </p>
     <button type="submit">Login</button>
 </form>
 {% endblock %}

@@ -63,3 +63,12 @@ class RankTA(models.Model):
 
     def __str__(self):
         return self.curriculum.subject + self.curriculum.courseName
+
+
+class RankCourse(models.Model):
+    TA = models.ForeignKey(TA, on_delete=models.CASCADE)
+    curriculum = models.ForeignKey(Course, on_delete=models.CASCADE)
+    value = models.IntegerField(default=0)  # ranking for course
+
+    def __str__(self):
+        return self.TA.user.username

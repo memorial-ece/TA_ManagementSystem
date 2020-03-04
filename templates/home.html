@@ -2,8 +2,16 @@
 
 {% block content %}
     {% if user.is_authenticated %}
-        <p>Hi {{ user.username }}!<a href="{% url 'logout' %}">logout</a></p>
-        <a href="{% url 'course_list' id=user.id %}">course list</a>
+        <p>Hi {{user.username }}!<a href="{% url 'logout' %}">logout</a></p>
+        {% if role == 'instructor' %}
+            <a href="{% url 'course_list' id=user.id %}">course list</a>
+        {% elif role == 'TA' %}
+            <a href="{% url 'select_course_list' %}">select course</a>
+            <a href="">upload cv</a>
+        {% elif role == 'departmenthead' %}
+            <p>department head</p>
+        {% endif %}
+
     {% else %}
         <p>please login the system</p>
         <a href="{% url 'login' %}">login</a>
