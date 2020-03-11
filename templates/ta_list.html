@@ -10,10 +10,9 @@
         <table border="0" width="1000">
             <tr>
                 <td width="40%">
-                    <label><select style="width:100%" multiple name="list1" size="12"
-                                   ondblclick="moveOption(document.ta.list1, document.ta.list2)">
+                    <label><select style="width:100%" multiple name="list1" size="12" onclick="showCV(document.ta.list1)">
                         {% for ta in tas %}
-                            <option value="{{ ta.id }}"><a href="">{{ ta.user.first_name }}&nbsp;{{ ta.user.last_name }}</a>&nbsp;({{ ta.user.email }})</option>
+                            <option value="{{ ta.id }}" id="{{ ta.cv.url }}">{{ ta.user.first_name }}&nbsp;{{ ta.user.last_name }}&nbsp;{{ ta.user.email }}</option>
                         {% endfor %}
                     </select></label>
                 </td>
@@ -38,17 +37,12 @@
             <button type="submit">submit</button>
         </p>
     </form>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $("#search-text").autocomplete({
-                source:"{% url "ta_list" id=course_id %}",
-                minLength:2,
-                open: function () {
-                    setTimeout(function () {
-                        $('.ui-autocomplete').css('z-index',99);
-                    },0)
-                }
-            });
-        });
-    </script>
+    <pre id="link"></pre>
 {% endblock %}
+
+
+
+
+
+
+

@@ -3,13 +3,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    <script src="{% static 'js/dragEvent.js' %}"></script>
     <title>TAManagementSystem</title>
 </head>
 <body>
 {% block content %}
+{% endblock %}
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="{% static 'js/dragEvent.js' %}"></script>
+
+{% block javascript %}
 {% endblock %}
 </body>
 </html>

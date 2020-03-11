@@ -7,41 +7,41 @@ from .forms import DutyCreateForm
 from django.shortcuts import redirect
 from django.db.models import Q
 import json
+from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import JsonResponse
 
 
 def loginpage(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        role = request.POST['system']
         user = authenticate(username=username, password=password)
-        if role == 'instructor':
-            try:
-                teacher = Teacher.objects.get(user__username=user.username)
-                request.session['username'] = username
-                return render(request, 'home.html', {'user': user, 'role': role})
-            except ObjectDoesNotExist:
-                return render(request, 'registration/login.html', {})
-
-        elif role == 'TA':
-            try:
-                ta = TA.objects.get(user__username=username)
-                request.session['username'] = username
-                return render(request, 'home.html', {'user': user, 'role': role})
-            except ObjectDoesNotExist:
-                return render(request, 'registration/login.html', {})
-
-        elif role == 'departmenthead':
-            try:
-                departmenthead = DepartmentHead.objects.get(user__username=user)
-                request.session['username'] = username
-                return render(request, 'home.html', {'user': user, 'role': role})
-            except ObjectDoesNotExist:
-                return render(request, 'registration/login.html', {})
+        if user is not None:
+            request.session['username'] = username
+            return render(request, "semester.html")
         else:
-            return render(request, 'registration/login.html', {})
-    return render(request, 'registration/login.html', {})
+            return render(request, 'registration/login.html')
+    return render(request, 'registration/login.html')
+
+
+def select_semester(request):
+    if request.method == "POST":
+        semester = request.POST['semester']
+        if semester is not None:
+            request.session['semester'] = semester
+            username = request.session['username']
+            user = User.objects.get(username=username)
+            role = []
+            if Teacher.objects.filter(user__username=username).exists():
+                role.append("instructor")
+            if TA.objects.filter(user__username=username).exists():
+                role.append("TA")
+            if DepartmentHead.objects.filter(user__username=username).exists():
+                role.append("departmenthead")
+            return render(request, 'home.html', {'user': user, 'role': role})
+        else:
+            HttpResponse('please select semester')
 
 
 def logout(request):
@@ -61,10 +61,27 @@ def course_list(request, id):
 
 
 # course corresponds TA duty
+# id: course id
 def duty_detail(request, id):
     course = Course.objects.get(id=id)
     taDuty = TADuty.objects.get(curriculum_id=id)
     return render(request, 'duty_detail.html', {'taDuty': taDuty, 'course': course})
+
+
+def ta_duty(request, id):
+    taDuty = TADuty.objects.get(curriculum_id=id)
+    if request.method == 'GET':
+        context = {
+            'labNumber': taDuty.labNumber,
+            'preparationHour': taDuty.preparationHour,
+            'labHour': taDuty.labHour,
+            'labWorkingHour': taDuty.labWorkingHour,
+            'assignmentNumber': taDuty.assignmentNumber,
+            'assignmentWorkingHour': taDuty.assignmentWorkingHour,
+            'contactHour': taDuty.contactHour,
+            'otherDutiesHour': taDuty.otherDutiesHour,
+        }
+        return JsonResponse(context)
 
 
 # edit TA duty
@@ -167,9 +184,7 @@ def select_course_list(request):
 def rank_course(request):
     if request.method == "POST":
         if request.session.has_key('username'):
-            print("====session enter====")
             username = request.session['username']
-            print(username)
             result = RankCourse.objects.filter(TA__user__username=username)
             if result.exists():
                 return redirect('select_course_list')
@@ -180,10 +195,9 @@ def rank_course(request):
                 rank_value = 1
                 ta = TA.objects.get(user__username=username)
                 for i in ranking_id:
-                   course = Course.objects.get(id=i)
-                   RankCourse.objects.create(TA=ta, curriculum=course, value=rank_value)
-                   rank_value = rank_value+1
+                    course = Course.objects.get(id=i)
+                    RankCourse.objects.create(TA=ta, curriculum=course, value=rank_value)
+                    rank_value = rank_value + 1
                 ranking = RankCourse.objects.filter(TA_id=ta.id).order_by('value')
                 return render(request, "course_ranking.html", {'ranking': ranking})
     return redirect('select_course_list')
-
