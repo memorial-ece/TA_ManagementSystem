@@ -2,20 +2,39 @@
 
 {% block content %}
     {% if user.is_authenticated %}
-        <p>Hi {{user.username }}!<a href="{% url 'logout' %}">logout</a></p>
-        {% for character in role %}
-            {% if character == 'instructor' %}
-                <a href="{% url 'course_list' id=user.id %}">course list</a>
-            {% elif character == 'TA' %}
-                <a href="{% url 'select_course_list' %}">select course</a>
-                <a href="">upload cv</a>
-            {% elif character == 'departmenthead' %}
-                <a href="">TA request list</a>
-                <a href="">confirm TA position allocation</a>
-            {% endif %}
-        {% endfor %}
-    {% else %}
-        <p>please login the system</p>
-        <a href="{% url 'login' %}">login</a>
-    {% endif %}
+    <p>Hi {{ user.username }}!</p>
+    <nav class="menu">
+        <ul>
+            {% for character in role %}
+                {% if character == 'instructor' %}
+                    <li>
+                            <a href="{% url 'course_list' id=user.id %}">course list</a>
+                    </li>
+                {% elif character == 'TA' %}
+                    <li>
+
+                            <a href="{% url 'select_course_list' %}">select course</a>
+                    </li>
+                    <li>
+                        <a href="">upload cv</a>
+                    </li>
+                {% elif character == 'departmenthead' %}
+                    <li>
+                        <a href="">TA request list</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'recommended_allocation' %}">TA allocation result</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            <li>
+                <a href="{% url 'logout' %}">logout</a>
+            </li>
+        </ul>
+    </nav>
+{% else %}
+    <p>please login the system</p>
+    <a href="{% url 'login' %}">login</a>
+{% endif %}
+
 {% endblock %}

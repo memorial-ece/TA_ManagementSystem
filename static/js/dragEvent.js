@@ -116,6 +116,8 @@ function showTADuty(e) {
                         '            <td>' + data["otherDutiesHour"] + '</td>\n' +
                         '        </tr>'+
                         '</table>';
+                    trHTML += '<p>'+data["totalHour"]+'</p>'+'<p>'+data["recommendedTANumber"]+'</p>';
+
                     let duty = "<p>TA duties/detail</p>";
 
                     $('#taduty').empty().append(duty,trHTML);

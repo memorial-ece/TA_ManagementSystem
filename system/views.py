@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate
-from .models import Teacher, TA, DepartmentHead, TADuty, Course, RankTA, RankCourse
+from .models import Teacher, TA, DepartmentHead, TADuty, Course, RankTA, RankCourse, MatchResult
 from .forms import DutyCreateForm
 from django.shortcuts import redirect
 from django.db.models import Q
@@ -10,6 +10,7 @@ import json
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
+from math import ceil
 
 
 def loginpage(request):
@@ -41,7 +42,7 @@ def select_semester(request):
                 role.append("departmenthead")
             return render(request, 'home.html', {'user': user, 'role': role})
         else:
-            HttpResponse('please select semester')
+            return HttpResponse('please select semester')
 
 
 def logout(request):
@@ -56,8 +57,12 @@ def logout(request):
 # id: user id
 def course_list(request, id):
     teacher = Teacher.objects.get(user_id=id)
-    courses = teacher.course_set.all()
-    return render(request, 'course.html', {'courses': courses})
+    semester = request.session['semester']
+    courses = teacher.course_set.filter(semester=semester)
+    if courses.exists():
+        return render(request, 'course.html', {'courses': courses})
+    else:
+        return HttpResponse('no course this semester')
 
 
 # course corresponds TA duty
@@ -80,6 +85,8 @@ def ta_duty(request, id):
             'assignmentWorkingHour': taDuty.assignmentWorkingHour,
             'contactHour': taDuty.contactHour,
             'otherDutiesHour': taDuty.otherDutiesHour,
+            'totalHour': taDuty.totalHour,
+            'recommendedTANumber': taDuty.recommendedTANumber,
         }
         return JsonResponse(context)
 
@@ -108,8 +115,12 @@ def duty_edit(request, id):
             total_assignment = capacity * assignment_number * assignment_working_hour
             # total hours
             total = total_lab + total_assignment + contact_hour + other_duties_hour
+            # recommended TA numbers
+            recommended_ta_number = ceil(total / 180)
+
             duty = form.save(commit=False)
             duty.totalHour = total
+            duty.recommendedTANumber = recommended_ta_number
             duty.save()
             return redirect('duty_detail', id=id)
     else:
@@ -201,3 +212,37 @@ def rank_course(request):
                 ranking = RankCourse.objects.filter(TA_id=ta.id).order_by('value')
                 return render(request, "course_ranking.html", {'ranking': ranking})
     return redirect('select_course_list')
+
+
+def recommended_allocation(request):
+    applicants = RankCourse.objects.all().order_by('TA_id', 'value')
+    for applicant in applicants:
+        rank = RankTA.objects.filter(curriculum_id=applicant.curriculum_id, TA_id=applicant.TA_id)
+        if rank.exists():
+            MatchResult.objects.create(TA=applicant, curriculum=rank, courseValue=rank.value, TAValue=applicant.value)
+        else:
+            continue
+    courses = Course.objects.filter(semester=request.session['semester'])
+    if courses.exists():
+        for course in courses:
+            position = TADuty.objects.filter(curriculum_id=course.curriculum_id)
+            matching = MatchResult.objects.filter(curriculum=course).order_by("courseValue")
+            if matching.exists():
+                if position.recommendedTANumber < matching.count():
+                    for note in matching[position.recommendedTANumber:]:
+                        note.delete()
+                else:
+                    continue
+
+    tas = TA.objects.all()
+    for ta in tas:
+        number = ta.expectedCourseNumber
+        match = MatchResult.objects.filter(TA=ta).order_by("TAValue")
+        if match.exists():
+            if number < match.count():
+                for note in match[number:]:
+                    note.delete()
+            else:
+                continue
+
+

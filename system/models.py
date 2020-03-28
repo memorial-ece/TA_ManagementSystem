@@ -13,7 +13,7 @@ class TA(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # %Y: year, %M: month, %D: day
     cv = models.FileField(blank=True, null=True, upload_to="cvs/%Y/%m/%d/")
-    availableHours = models.FloatField(default=0)
+    expectedCourseNumber = models.IntegerField(default=0, max_length=2)
     # department = models.CharField()
 
     def __str__(self):
@@ -21,6 +21,7 @@ class TA(models.Model):
 
 
 class DepartmentHead(models.Model):
+    department = models.CharField(max_length=20, default="")
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -51,11 +52,13 @@ class TADuty(models.Model):
     contactHour = models.FloatField(default=0)
     otherDutiesHour = models.FloatField(default=0)
     totalHour = models.FloatField(default=0)
+    recommendedTANumber = models.IntegerField(default=0)
 
     def __str__(self):
         return self.curriculum.subject + self.curriculum.courseName
 
 
+# course rank applicant
 class RankTA(models.Model):
     curriculum = models.ForeignKey(Course, on_delete=models.CASCADE)
     TA = models.ForeignKey(TA, on_delete=models.CASCADE)
@@ -65,6 +68,7 @@ class RankTA(models.Model):
         return self.curriculum.subject + self.curriculum.courseName
 
 
+# applicant rank course
 class RankCourse(models.Model):
     TA = models.ForeignKey(TA, on_delete=models.CASCADE)
     curriculum = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -72,3 +76,10 @@ class RankCourse(models.Model):
 
     def __str__(self):
         return self.TA.user.username
+
+
+class MatchResult(models.Model):
+    curriculum = models.ForeignKey(Course, on_delete=models.CASCADE)  # course
+    TA = models.ForeignKey(TA, on_delete=models.CASCADE)  # TA
+    courseValue = models.IntegerField(default=0)  # rank
+    TAValue = models.IntegerField(default=0)

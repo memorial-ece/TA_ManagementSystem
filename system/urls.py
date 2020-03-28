@@ -13,4 +13,5 @@ urlpatterns = [
     path('course_list/', views.select_course_list, name="select_course_list"),
     path('ranked_course/', views.rank_course, name="rank_course"),
     path('semester/', views.select_semester, name="select_semester"),
+    path('recommended_allocation/', views.recommended_allocation, name="recommended_allocation"),
 ]
