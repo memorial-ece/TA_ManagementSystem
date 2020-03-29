@@ -215,34 +215,38 @@ def rank_course(request):
 
 
 def recommended_allocation(request):
-    applicants = RankCourse.objects.all().order_by('TA_id', 'value')
-    for applicant in applicants:
-        rank = RankTA.objects.filter(curriculum_id=applicant.curriculum_id, TA_id=applicant.TA_id)
-        if rank.exists():
-            MatchResult.objects.create(TA=applicant, curriculum=rank, courseValue=rank.value, TAValue=applicant.value)
-        else:
+    applicants = RankCourse.objects.all()
+    for item in applicants:
+        try:
+            rank = RankTA.objects.get(curriculum_id=item.curriculum_id, TA_id=item.TA_id)
+            MatchResult.objects.create(TA=item.TA, curriculum=rank.curriculum, courseRanking=rank.ranking,
+                                       TARanking=item.ranking)
+        except RankTA.DoesNotExist:
             continue
+
     courses = Course.objects.filter(semester=request.session['semester'])
     if courses.exists():
         for course in courses:
-            position = TADuty.objects.filter(curriculum_id=course.curriculum_id)
-            matching = MatchResult.objects.filter(curriculum=course).order_by("courseValue")
+            position = TADuty.objects.get(curriculum_id=course.id)
+            matching = MatchResult.objects.filter(curriculum=course).order_by("courseRanking")
             if matching.exists():
                 if position.recommendedTANumber < matching.count():
                     for note in matching[position.recommendedTANumber:]:
                         note.delete()
                 else:
                     continue
+            else:
+                continue
 
     tas = TA.objects.all()
     for ta in tas:
         number = ta.expectedCourseNumber
-        match = MatchResult.objects.filter(TA=ta).order_by("TAValue")
+        match = MatchResult.objects.filter(TA=ta).order_by("TARanking")
         if match.exists():
             if number < match.count():
                 for note in match[number:]:
                     note.delete()
-            else:
-                continue
-
-
+                else:
+                    continue
+        else:
+            continue

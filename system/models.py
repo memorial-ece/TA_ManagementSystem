@@ -13,7 +13,8 @@ class TA(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # %Y: year, %M: month, %D: day
     cv = models.FileField(blank=True, null=True, upload_to="cvs/%Y/%m/%d/")
-    expectedCourseNumber = models.IntegerField(default=0, max_length=2)
+    expectedCourseNumber = models.IntegerField(default=0)
+
     # department = models.CharField()
 
     def __str__(self):
@@ -62,7 +63,7 @@ class TADuty(models.Model):
 class RankTA(models.Model):
     curriculum = models.ForeignKey(Course, on_delete=models.CASCADE)
     TA = models.ForeignKey(TA, on_delete=models.CASCADE)
-    value = models.IntegerField(default=0)  # ranking for TA
+    ranking = models.IntegerField(default=0)  # ranking for TA
 
     def __str__(self):
         return self.curriculum.subject + self.curriculum.courseName
@@ -72,7 +73,7 @@ class RankTA(models.Model):
 class RankCourse(models.Model):
     TA = models.ForeignKey(TA, on_delete=models.CASCADE)
     curriculum = models.ForeignKey(Course, on_delete=models.CASCADE)
-    value = models.IntegerField(default=0)  # ranking for course
+    ranking = models.IntegerField(default=0)  # ranking for course
 
     def __str__(self):
         return self.TA.user.username
@@ -81,5 +82,8 @@ class RankCourse(models.Model):
 class MatchResult(models.Model):
     curriculum = models.ForeignKey(Course, on_delete=models.CASCADE)  # course
     TA = models.ForeignKey(TA, on_delete=models.CASCADE)  # TA
-    courseValue = models.IntegerField(default=0)  # rank
-    TAValue = models.IntegerField(default=0)
+    courseRanking = models.IntegerField(default=0)  # rank
+    TARanking = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.curriculum.subject + self.curriculum.courseName
