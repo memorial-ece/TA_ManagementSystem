@@ -84,6 +84,7 @@ class MatchResult(models.Model):
     TA = models.ForeignKey(TA, on_delete=models.CASCADE)  # TA
     courseRanking = models.IntegerField(default=0)  # rank
     TARanking = models.IntegerField(default=0)
+    positions = models.IntegerField(default=0)
 
     def __str__(self):
         return self.curriculum.subject + self.curriculum.courseName

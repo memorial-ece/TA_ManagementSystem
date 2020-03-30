@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate
 from .models import Teacher, TA, DepartmentHead, TADuty, Course, RankTA, RankCourse, MatchResult
-from .forms import DutyCreateForm
+from .forms import DutyCreateForm, DocumentForm
 from django.shortcuts import redirect
 from django.db.models import Q
 import json
@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from math import ceil
+from django.core.files.storage import FileSystemStorage
 
 
 def loginpage(request):
@@ -73,6 +74,8 @@ def duty_detail(request, id):
     return render(request, 'duty_detail.html', {'taDuty': taDuty, 'course': course})
 
 
+# ta duty for each course
+# id: course id
 def ta_duty(request, id):
     taDuty = TADuty.objects.get(curriculum_id=id)
     if request.method == 'GET':
@@ -133,7 +136,7 @@ def duty_edit(request, id):
 def ta_list(request, id):
     result = RankTA.objects.filter(curriculum_id=id)
     if result.exists():
-        ranking = RankTA.objects.filter(curriculum_id=id).order_by("value")
+        ranking = RankTA.objects.filter(curriculum_id=id).order_by("ranking")
         return render(request, "ta_ranking.html", {'course_id': id, 'ranking': ranking})
     elif request.is_ajax():
         q = request.GET.get('ta_contains')
@@ -179,19 +182,21 @@ def rank_ta(request, id):
 
 
 # ======= TA PART =======
+# select courses and rank them
 def select_course_list(request):
     if request.session.has_key('username'):
         username = request.session['username']
         result = RankCourse.objects.filter(TA__user__username=username)
         if result.exists():
             ta = TA.objects.get(user__username=username)
-            ranking = RankCourse.objects.filter(TA_id=ta.id).order_by('value')
+            ranking = RankCourse.objects.filter(TA_id=ta.id).order_by('ranking')
             return render(request, "course_ranking.html", {'ranking': ranking})
 
     courses = Course.objects.all()
     return render(request, 'course_list.html', {"courses": courses})
 
 
+# TA candidates rank referred course
 def rank_course(request):
     if request.method == "POST":
         if request.session.has_key('username'):
@@ -209,18 +214,39 @@ def rank_course(request):
                     course = Course.objects.get(id=i)
                     RankCourse.objects.create(TA=ta, curriculum=course, value=rank_value)
                     rank_value = rank_value + 1
-                ranking = RankCourse.objects.filter(TA_id=ta.id).order_by('value')
+                ranking = RankCourse.objects.filter(TA_id=ta.id).order_by('ranking')
                 return render(request, "course_ranking.html", {'ranking': ranking})
     return redirect('select_course_list')
 
 
+# upload cv to server
+# name: TA' username
+def upload(request, name):
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            ta = TA.objects.get(user__username=name)
+            ta.cv = request.FILES['docfile']
+            ta.save()
+            return HttpResponse('CV uploaded successfully')
+        else:
+            form = DocumentForm()
+    return render(request, 'upload.html')
+
+
+# TA and course matching algorithm result
 def recommended_allocation(request):
+    if MatchResult.objects.all() is not None:
+        for item in MatchResult.objects.all():
+            item.delete()
+
     applicants = RankCourse.objects.all()
     for item in applicants:
         try:
             rank = RankTA.objects.get(curriculum_id=item.curriculum_id, TA_id=item.TA_id)
+            duty = TADuty.objects.get(curriculum_id=item.curriculum_id)
             MatchResult.objects.create(TA=item.TA, curriculum=rank.curriculum, courseRanking=rank.ranking,
-                                       TARanking=item.ranking)
+                                       TARanking=item.ranking, positions=duty.recommendedTANumber)
         except RankTA.DoesNotExist:
             continue
 
@@ -250,3 +276,7 @@ def recommended_allocation(request):
                     continue
         else:
             continue
+
+    return render(request, 'recommended_allocation.html',
+                  {'matchingResult': MatchResult.objects.all().order_by('curriculum__courseName'),
+                   'count': MatchResult.objects.all().count()})

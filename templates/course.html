@@ -2,13 +2,16 @@
 
 {% block content %}
     <h1>Course List</h1>
-    <table border="2" bordercolor="black" width="500" height="200" cellspacing="0" cellpadding="5">
+    <table>
+        <thead>
         <tr>
             <th>Subject</th>
             <th>Course name</th>
             <th>Link</th>
             <th>Link</th>
         </tr>
+        </thead>
+        <tbody>
         {% for course in courses %}
             <tr>
                 <td>{{ course.subject }}{{ course.courseName }}</td>
@@ -17,5 +20,6 @@
                 <td><a href="{% url 'ta_list' id=course.id %}">select TA</a></td>
             </tr>
         {% endfor %}
+        </tbody>
     </table>
 {% endblock %}

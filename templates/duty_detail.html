@@ -3,13 +3,16 @@
 {% block content %}
     <h1>duties and details for TA</h1>
     <p>#student:{{ course.capacity }}</p>
-    <table border="2" bordercolor="black" width="500" height="100" cellspacing="0" cellpadding="5">
+    <table>
+        <thead>
         <tr>
             <th>classification</th>
             <th>times</th>
             <th>teaching activity</th>
             <th>Approx. hours/student</th>
         </tr>
+        </thead>
+        <tbody>
         <tr>
             <td rowspan="3">Lab</td>
             <td rowspan="3">{{ taDuty.labNumber }}</td>
@@ -40,6 +43,7 @@
             <td>other duties</td>
             <td>{{ taDuty.otherDutiesHour }}</td>
         </tr>
+        </tbody>
     </table>
     <p>total hours:{{ taDuty.totalHour }}h</p>
     <p>recommended TA numbers: {{ taDuty.recommendedTANumber }}&nbsp;position(s)</p>
