@@ -14,5 +14,8 @@ urlpatterns = [
     path('ranked_course/', views.rank_course, name="rank_course"),
     path('semester/', views.select_semester, name="select_semester"),
     path('recommended_allocation/', views.recommended_allocation, name="recommended_allocation"),
-    path('upload/<name>/', views.upload, name="upload"),
+    path('upload/', views.upload, name="upload"),
+    path('download/', views.download_excel_data, name="download_excel_data"),
+    path('ta_request_list/', views.ta_request_list, name="ta_request_list"),
+    path('ta_request_list/duty/<id>/', views.duty_all, name="duty_all"),
 ]

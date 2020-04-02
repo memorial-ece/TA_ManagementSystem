@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+    <p>uploaded successfully!<span id="spn">5</span> mins jump to the home page...</p>
+    <a href="{% url 'home' %}">back home</a>
+    <script>
+        onload = function () {
+            setInterval(go, 1000)
+        };
+        let x = 4;
+
+        function go() {
+            if (x > 0) {
+                document.getElementById('spn').innerHTML = x;
+            } else {
+                location.href = {%url 'home'%};
+            }
+            x--;
+        }
+    </script>
+{% endblock %}
