@@ -23,7 +23,10 @@
                 <td id="{{ row.id }}" contenteditable="false">{{ row.recommendedTANumber }}</td>
                 <td><a href="javascript:void(0)" onclick="floatWindow({{ row.curriculum.id }})">view detail/duties</a>
                 </td>
-                <td><a href="javascript:void(0)" onclick="editable({{ row.id }})">edit</a></td>
+                <td><a id="{{ row.id }}edit" href="javascript:void(0)" onclick="editable({{ row.id }}, {{ row.id }}+'edit', {{ row.id }}+'save')">edit</a>
+                    <span id="{{ row.id }}save" class="save"><a href="javascript:void(0)" onclick="cancel({{ row.recommendedTANumber }},{{ row.id }},{{ row.id }}+'edit',{{ row.id }}+'save')">cancel |</a>
+                    <a href="javascript:void(0)" onclick="save({{ row.id }},{{ row.id }}+'edit',{{ row.id }}+'save')">save |</a></span>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -33,7 +36,6 @@
         <p id="insert"></p>
     </div>
     <div id="fade" class="black_overlay"></div><br>
-    <button type="submit">save</button>
 {% endblock %}
 
 

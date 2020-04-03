@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import Teacher, TA, DepartmentHead, TADuty, Course, RankTA, RankCourse, MatchResult
 from .forms import DutyCreateForm
 from django.shortcuts import redirect
@@ -378,3 +380,19 @@ def duty_all(request, id):
             'recommendedTANumber': ta_duty.recommendedTANumber,
         }
         return JsonResponse(context)
+
+
+@csrf_exempt
+def update_positions(request):
+    if request.method == "POST" and request.is_ajax():
+        position = request.POST['positions']
+        print(position)
+        duty_id = request.POST['id']
+        try:
+            duty = TADuty.objects.get(id=duty_id)
+            duty.recommendedTANumber = position
+            print(duty.recommendedTANumber)
+            duty.save()
+            return HttpResponse(status=204)
+        except TADuty.DoesNotExist:
+            return JsonResponse({'error': 'something bad'}, status=400)

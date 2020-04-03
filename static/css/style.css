@@ -109,3 +109,15 @@ tbody > tr:nth-child(even) {
 .positions {
 
 }
+
+tbody > tr:hover {
+    background-color: #DDDDDD;
+}
+
+a {
+    text-decoration: none;
+}
+
+.save {
+    display: none;
+}

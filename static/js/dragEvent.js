@@ -221,7 +221,34 @@ function closeItem() {
     document.getElementById('fade').style.display = 'none';
 }
 
-function editable(id) {
+function editable(id, editID, saveID) {
     let edit = document.getElementById(id);
     edit.setAttribute('contenteditable', true);
+    document.getElementById(editID).style.display = 'none';
+    document.getElementById(saveID).style.display = 'inline';
+}
+
+function cancel(positions, id, editID, saveID) {
+    document.getElementById(id).innerHTML = positions;
+    document.getElementById(id).setAttribute('contenteditable', false);
+    document.getElementById(editID).style.display = 'inline';
+    document.getElementById(saveID).style.display = 'none';
+}
+
+function save(id, editID, saveID) {
+    let positions = document.getElementById(id).innerText;
+    console.log(positions);
+    $.ajax({
+        url: "save/",
+        type: "POST",
+        data: {"positions": positions, "id": id},
+        dataType: 'json',
+        success: function (textStatus) {
+            console.log('success');
+            cancel(positions,id,editID,saveID);
+        },
+        error: function () {
+            console.log('error!');
+        },
+    });
 }

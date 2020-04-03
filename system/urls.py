@@ -18,4 +18,5 @@ urlpatterns = [
     path('download/', views.download_excel_data, name="download_excel_data"),
     path('ta_request_list/', views.ta_request_list, name="ta_request_list"),
     path('ta_request_list/duty/<id>/', views.duty_all, name="duty_all"),
+    path('ta_request_list/save/', views.update_positions, name="update_positions"),
 ]
