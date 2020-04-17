@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block nav %}
-    {% if user.is_authenticated %}
-    <p>Hi {{ user.username }}!</p>
+    {% if request.session.username %}
+    <p>Hi {{ request.session.username }}!</p>
     <nav class="menu">
         <ul>
-            {% for character in role %}
+            {% for character in request.session.role %}
                 {% if character == 'instructor' %}
                     <li>
                             <a href="{% url 'course_list' id=user.id %}">course list</a>

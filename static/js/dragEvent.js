@@ -117,7 +117,8 @@ function showTADuty(e) {
                         '            <td>' + data["otherDutiesHour"] + '</td>\n' +
                         '        </tr>' +
                         '</table>';
-                    trHTML += '<p>' + data["totalHour"] + '</p>' + '<p>' + data["recommendedTANumber"] + '</p>';
+                    trHTML += '<p>total hour:'+data['totalHour']+' </p>';
+                    trHTML += '<p>ta positions:'+data['recommendedTANumber']+'</p>';
 
                     let duty = "<p>TA duties/detail</p>";
 
@@ -207,6 +208,8 @@ function floatWindow(id) {
                 '            <td>' + data["otherDutiesHour"] + '</td>\n' +
                 '        </tr>' +
                 '</table>';
+            trHTML += '<p>total hour:'+data['totalHour']+' </p>';
+            trHTML += '<p>ta positions:'+data['recommendedTANumber']+'</p>';
             $('#insert').empty().append(trHTML);
         },
         // handel a unsuccessful response

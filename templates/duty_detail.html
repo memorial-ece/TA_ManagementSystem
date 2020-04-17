@@ -48,4 +48,5 @@
     <p>total hours:{{ taDuty.totalHour }}h</p>
     <p>recommended TA numbers: {{ taDuty.recommendedTANumber }}&nbsp;position(s)</p>
     <button type="button"><a href="{% url 'duty_edit' id=course.id %}">modification</a></button>
+    <button type="button"><a href="{% url 'course_list' id=course.instructor.user.id %}">back</a></button>
 {% endblock %}

@@ -23,7 +23,7 @@ SECRET_KEY = ')f&xmeapxb!ty-^au*$y81&*r9wk=p34h@17dd0xcvy823!sd5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+#'192.168.2.14'
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -109,7 +109,10 @@ USE_L10N = True
 
 USE_TZ = True
 
-SESSION_COOKIE_AGE = 3600
+SESSION_COOKIE_AGE = 60 * 30
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 

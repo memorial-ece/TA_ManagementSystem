@@ -36,9 +36,8 @@ tbody > tr:nth-child(even) {
 
 .menu ul, .menu li {
     list-style: none;
-    margin: 0;
+    margin: 1em;
     padding: 0;
-    float: left;
 }
 
 .menu > ul > li > a {

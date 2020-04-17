@@ -13,7 +13,7 @@ class TA(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # %Y: year, %M: month, %D: day
     cv = models.FileField(blank=True, null=True, upload_to="cvs/%Y/%m/%d/")
-    expectedCourseNumber = models.IntegerField(default=0)
+    # expectedCourseNumber = models.IntegerField(default=0)
 
     # department = models.CharField()
 
@@ -85,6 +85,7 @@ class MatchResult(models.Model):
     courseRanking = models.IntegerField(default=0)  # rank
     TARanking = models.IntegerField(default=0)
     positions = models.IntegerField(default=0)
+    status = models.BooleanField(default=False)
 
     def __str__(self):
         return self.curriculum.subject + self.curriculum.courseName
