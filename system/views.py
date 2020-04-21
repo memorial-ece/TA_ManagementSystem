@@ -252,54 +252,43 @@ def upload(request):
 # ===============department head==============
 # TA and course matching algorithm result
 def recommended_allocation(request):
-    # result = MatchResult.objects.filter(curriculum__semester=request.session['semester'])
-    # if result.exists():
-    #     return render(request, 'recommended_allocation.html',
-    #                   {'matchingResult': MatchResult.objects.all().order_by('curriculum__courseName'),
-    #                    'count': MatchResult.objects.all().count()})
-    #
-    # else:
-    #     applicants = RankCourse.objects.all()
-    #     for item in applicants:
-    #         try:
-    #             rank = RankTA.objects.get(curriculum_id=item.curriculum_id, TA_id=item.TA_id)
-    #             duty = TADuty.objects.get(curriculum_id=item.curriculum_id)
-    #             MatchResult.objects.create(TA=item.TA, curriculum=rank.curriculum, courseRanking=rank.ranking,
-    #                                        TARanking=item.ranking, positions=duty.recommendedTANumber, status=False)
-    #         except RankTA.DoesNotExist:
-    #             continue
+    result = MatchResult.objects.filter(curriculum__semester=request.session['semester'])
+    if result.exists():
+        return render(request, 'recommended_allocation.html',
+                      {'matchingResult': MatchResult.objects.filter(status=True).order_by('curriculum__courseName'),
+                       'count': MatchResult.objects.filter(status=True).count()})
+    else:
+        applicants = TA.objects.all()
+        for applicant in applicants:
+            matching = MatchResult.objects.filter(TA=applicant).order_by('TARanking')
+            for m in matching:
+                print(m.curriculum)
+                print(MatchResult.objects.filter(curriculum=m.curriculum, status=True).count())
+                if MatchResult.objects.filter(curriculum=m.curriculum, status=True).count() < m.positions:
+                    print('----')
+                    m.status = True
+                    m.save()
+                    break
+                elif MatchResult.objects.filter(curriculum=m.curriculum, status=True).count() is m.positions:
+                    for result in MatchResult.objects.filter(curriculum=m.curriculum, status=True).order_by(
+                            '-courseRanking'):
+                        if m.courseRanking < result.courseRanking:
+                            result.status = False
+                            break
+                        else:
+                            continue
+        courses = Course.objects.filter(semester=request.session['semester'])
+        for course in courses:
+            if MatchResult.objects.filter(curriculum=course, status__exact=False).count() is MatchResult.objects.filter(
+                    curriculum=course).count():
+                position = MatchResult.objects.filter(curriculum=course)[0].positions
+                for result in MatchResult.objects.filter(curriculum=course).order_by('courseRanking') and position:
+                    result.status = True
+                    position = position - 1
 
-    applicants = TA.objects.all()
-    for applicant in applicants:
-        matching = MatchResult.objects.filter(TA=applicant).order_by('TARanking')
-        for m in matching:
-            print(m.curriculum)
-            print(MatchResult.objects.filter(curriculum=m.curriculum, status=True).count())
-            if MatchResult.objects.filter(curriculum=m.curriculum, status=True).count() < m.positions:
-                print('----')
-                m.status = True
-                m.save()
-                break
-            elif MatchResult.objects.filter(curriculum=m.curriculum, status=True).count() is m.positions:
-                for result in MatchResult.objects.filter(curriculum=m.curriculum, status=True).order_by(
-                        '-courseRanking'):
-                    if m.courseRanking < result.courseRanking:
-                        result.status = False
-                        break
-                    else:
-                        continue
-    courses = Course.objects.filter(semester=request.session['semester'])
-    for course in courses:
-        if MatchResult.objects.filter(curriculum=course, status__exact=False).count() is MatchResult.objects.filter(
-                curriculum=course).count():
-            position = MatchResult.objects.filter(curriculum=course)[0].positions
-            for result in MatchResult.objects.filter(curriculum=course).order_by('courseRanking') and position:
-                result.status = True
-                position = position - 1
-
-    return render(request, 'recommended_allocation.html',
-                  {'matchingResult': MatchResult.objects.filter(status=True).order_by('curriculum__courseName'),
-                   'count': MatchResult.objects.filter(status=True).count()})
+        return render(request, 'recommended_allocation.html',
+                      {'matchingResult': MatchResult.objects.filter(status=True).order_by('curriculum__courseName'),
+                       'count': MatchResult.objects.filter(status=True).count()})
 
 
 # download TA allocation result file as excel file
