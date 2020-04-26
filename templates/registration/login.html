@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>login</h2>
+<form method="post" action="{% url 'login' %}" name="loginForm" onsubmit="return validateForm()">
+    {% csrf_token %}
+    <p>
+        <label>username:<input type="text" name="username"><span id="invalid1"></span></label>
+    </p>
+    <p>
+        <label>password:<input type="password" name="password"><span id="invalid2"></span></label>
+    </p>
+    <button type="submit">Login</button>
+</form>
+
+{% endblock %}
